@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Download, Maximize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GeneratedImage } from "@/lib/gemini-client";
 import { downloadImage } from "@/lib/image-utils";
@@ -59,46 +59,68 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
             {images.length > 0 && (
                 <div className="grid grid-cols-2 gap-4">
                     {images.map((img, index) => (
-                        <Dialog key={index}>
-                            <DialogTrigger asChild>
-                                <div className="relative group cursor-pointer rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 bg-white">
-                                    <img
-                                        src={img.url}
-                                        alt={`Generated ${index + 1}`}
-                                        className="w-full h-auto object-contain bg-gray-50 aspect-square"
-                                    />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                        <Maximize2 className="text-white w-6 h-6 drop-shadow-md" />
-                                    </div>
-                                </div>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-[95vw] w-full p-1 bg-transparent border-none shadow-none">
-                                <DialogTitle className="sr-only">查看大图</DialogTitle>
-                                <div className="relative bg-white rounded-lg overflow-hidden shadow-2xl">
-                                    <img
-                                        src={img.url}
-                                        alt={`Generated ${index + 1}`}
-                                        className="w-full h-auto max-h-[95vh] object-contain"
-                                    />
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent flex justify-end">
-                                        <Button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                downloadImage(img.url, `gemini-generated-${Date.now()}-${index}.png`);
-                                            }}
-                                            className="bg-white text-gray-900 hover:bg-gray-100"
-                                            size="sm"
-                                        >
-                                            <Download className="w-4 h-4 mr-2" />
-                                            下载原图
-                                        </Button>
-                                    </div>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+                        <div
+                            key={index}
+                            className="relative group cursor-pointer rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 bg-white"
+                            onClick={() => {
+                                setSelectedImage(img);
+                            }}
+                        >
+                            <img
+                                src={img.url}
+                                alt={`Generated ${index + 1}`}
+                                className="w-full h-auto object-contain bg-gray-50 aspect-square"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                <Maximize2 className="text-white w-6 h-6 drop-shadow-md" />
+                            </div>
+                        </div>
                     ))}
                 </div>
             )}
+
+            <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+                {selectedImage && (
+                    <DialogContent showCloseButton={false} className="max-w-none sm:max-w-none w-screen h-screen max-h-screen p-0 bg-black/20 backdrop-blur-sm border-none shadow-none flex flex-col items-center justify-center">
+                        <DialogTitle className="sr-only">查看大图</DialogTitle>
+                        <div
+                            className="relative w-full h-full flex items-center justify-center overflow-hidden cursor-pointer"
+                            onClick={() => setSelectedImage(null)}
+                        >
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-4 right-4 z-50 text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedImage(null);
+                                }}
+                            >
+                                <X className="w-6 h-6" />
+                                <span className="sr-only">关闭</span>
+                            </Button>
+                            <img
+                                src={selectedImage.url}
+                                alt="Full screen preview"
+                                className="w-full h-full object-contain"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex justify-end">
+                                <Button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        downloadImage(selectedImage.url, `gemini-generated-${Date.now()}.png`);
+                                    }}
+                                    className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border border-white/20"
+                                    size="sm"
+                                >
+                                    <Download className="w-4 h-4 mr-2" />
+                                    下载原图
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                )}
+            </Dialog>
 
             {/* Text Response */}
             {textResponse && (
