@@ -175,6 +175,7 @@ export function ImageGenerator() {
                         images={generatedImages}
                         textResponse={textResponse}
                         loading={loading}
+                        numImages={numImages}
                     />
                 </div>
             </div>

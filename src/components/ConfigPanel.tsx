@@ -138,7 +138,7 @@ export function ConfigPanel({
                         value={[numImages]}
                         onValueChange={(vals) => setNumImages(vals[0])}
                         min={1}
-                        max={4}
+                        max={9}
                         step={1}
                         disabled={disabled}
                         className="[&_[role=slider]]:bg-banana-400 [&_[role=slider]]:border-banana-500 [&_.bg-primary]:bg-banana-300"

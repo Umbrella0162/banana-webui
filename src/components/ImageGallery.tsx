@@ -13,9 +13,10 @@ interface ImageGalleryProps {
     images: GeneratedImage[];
     textResponse: string;
     loading: boolean;
+    numImages?: number;
 }
 
-export function ImageGallery({ images, textResponse, loading }: ImageGalleryProps) {
+export function ImageGallery({ images, textResponse, loading, numImages = 4 }: ImageGalleryProps) {
     const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
 
     if (loading) {
@@ -23,7 +24,7 @@ export function ImageGallery({ images, textResponse, loading }: ImageGalleryProp
             <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">生成结果</h3>
                 <div className="grid grid-cols-2 gap-4">
-                    {[1, 2, 3, 4].map((i) => (
+                    {Array.from({ length: numImages }).map((_, i) => (
                         <div
                             key={i}
                             className="aspect-square bg-banana-50 rounded-lg animate-pulse border border-banana-100"
@@ -71,13 +72,13 @@ export function ImageGallery({ images, textResponse, loading }: ImageGalleryProp
                                     </div>
                                 </div>
                             </DialogTrigger>
-                            <DialogContent className="max-w-4xl w-full p-1 bg-transparent border-none shadow-none">
+                            <DialogContent className="max-w-[95vw] w-full p-1 bg-transparent border-none shadow-none">
                                 <DialogTitle className="sr-only">查看大图</DialogTitle>
                                 <div className="relative bg-white rounded-lg overflow-hidden shadow-2xl">
                                     <img
                                         src={img.url}
                                         alt={`Generated ${index + 1}`}
-                                        className="w-full h-auto max-h-[80vh] object-contain"
+                                        className="w-full h-auto max-h-[95vh] object-contain"
                                     />
                                     <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent flex justify-end">
                                         <Button
