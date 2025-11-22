@@ -115,7 +115,7 @@ export function PromptInput({ value, onChange, disabled }: PromptInputProps) {
                             <Textarea
                                 value={tempValue}
                                 onChange={(e) => setTempValue(e.target.value)}
-                                className="flex-1 w-full resize-none p-4 text-sm font-mono leading-relaxed border-gray-200 focus-visible:ring-banana-300 focus-visible:border-banana-300 bg-white whitespace-pre-wrap overflow-x-hidden [word-break:break-all]"
+                                className="flex-1 w-full resize-none p-4 text-sm font-mono leading-relaxed border-gray-200 focus-visible:ring-0 focus-visible:border-gray-200 bg-white whitespace-pre-wrap overflow-x-hidden [word-break:break-all]"
                                 placeholder="在此输入详细的提示词（支持 Markdown 语法）..."
                             />
                         </div>
