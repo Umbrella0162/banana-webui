@@ -121,7 +121,7 @@ export function ImageGenerator() {
                         <Banana className="w-6 h-6 text-gray-900" />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                        next-banana
+                        Nano-Banana 图像生成
                     </h1>
                 </div>
                 <SettingsDialog />

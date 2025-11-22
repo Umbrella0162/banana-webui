@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "next-banana - Gemini 图像生成",
+  title: "Gemini 图像生成",
   description: "基于 Next.js 16 构建的 Gemini 图像生成 WebUI",
 };
 
