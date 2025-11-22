@@ -48,7 +48,8 @@ export function ImageGenerator() {
         const apiKey = StorageManager.getApiKey();
         const apiEndpoint = StorageManager.getEndpoint(); // Get custom endpoint
 
-        if (!apiKey) {
+        // 验证 API 密钥是否存在且不为空
+        if (!apiKey || apiKey.trim() === '') {
             toast.error("请先在右上角设置中配置 API 密钥");
             return;
         }
