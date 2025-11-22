@@ -94,10 +94,10 @@ export function PromptInput({ value, onChange, disabled }: PromptInputProps) {
 
                     <div className="flex-1 min-h-0 grid grid-cols-2 gap-4">
                         {/* Left: Preview */}
-                        <div className="flex flex-col gap-2 h-full">
+                        <div className="flex flex-col gap-2 h-full overflow-hidden">
                             <Label className="text-sm font-medium text-gray-500">预览</Label>
-                            <div className="flex-1 rounded-lg border border-gray-200 bg-gray-50/50 p-4 overflow-y-auto">
-                                <div className="prose prose-sm max-w-none text-gray-700 prose-headings:font-bold prose-a:text-banana-600 prose-strong:text-gray-900">
+                            <div className="flex-1 rounded-lg border border-gray-200 bg-gray-50/50 p-4 overflow-y-auto overflow-x-hidden">
+                                <div className="prose prose-sm max-w-none text-gray-700 prose-headings:font-bold prose-a:text-banana-600 prose-strong:text-gray-900 [word-break:break-all] [overflow-wrap:anywhere]">
                                     {tempValue ? (
                                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
                                             {tempValue}
@@ -110,12 +110,12 @@ export function PromptInput({ value, onChange, disabled }: PromptInputProps) {
                         </div>
 
                         {/* Right: Edit */}
-                        <div className="flex flex-col gap-2 h-full">
+                        <div className="flex flex-col gap-2 h-full overflow-hidden">
                             <Label className="text-sm font-medium text-gray-500">编辑 (Markdown)</Label>
                             <Textarea
                                 value={tempValue}
                                 onChange={(e) => setTempValue(e.target.value)}
-                                className="flex-1 w-full resize-none p-4 text-sm font-mono leading-relaxed border-gray-200 focus-visible:ring-banana-300 focus-visible:border-banana-300 bg-white"
+                                className="flex-1 w-full resize-none p-4 text-sm font-mono leading-relaxed border-gray-200 focus-visible:ring-banana-300 focus-visible:border-banana-300 bg-white whitespace-pre-wrap overflow-x-hidden [word-break:break-all]"
                                 placeholder="在此输入详细的提示词（支持 Markdown 语法）..."
                             />
                         </div>
