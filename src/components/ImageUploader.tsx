@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 interface ImageUploaderProps {
@@ -10,9 +11,18 @@ interface ImageUploaderProps {
     setImages: (images: File[]) => void;
     disabled?: boolean;
     maxImages?: number;
+    enableCompression?: boolean;
+    setEnableCompression?: (value: boolean) => void;
 }
 
-export function ImageUploader({ images, setImages, disabled, maxImages = 14 }: ImageUploaderProps) {
+export function ImageUploader({
+    images,
+    setImages,
+    disabled,
+    maxImages = 14,
+    enableCompression = true,
+    setEnableCompression
+}: ImageUploaderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,7 +116,24 @@ export function ImageUploader({ images, setImages, disabled, maxImages = 14 }: I
 
     return (
         <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">参考图像 (可选)</Label>
+            {/* Header with label and compression toggle */}
+            <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-gray-700">参考图像 (可选)</Label>
+                {setEnableCompression && (
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor="compress-toggle" className="text-xs text-gray-600 cursor-pointer">
+                            压缩图片
+                        </Label>
+                        <Switch
+                            id="compress-toggle"
+                            checked={enableCompression}
+                            onCheckedChange={setEnableCompression}
+                            disabled={disabled}
+                            className="data-[state=checked]:bg-banana-400"
+                        />
+                    </div>
+                )}
+            </div>
 
             {/* Upload Area */}
             <div

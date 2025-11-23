@@ -13,6 +13,7 @@ import { SettingsDialog } from "@/components/SettingsDialog";
 import { GeminiImageClient, GeneratedImage } from "@/lib/gemini-client";
 import { StorageManager } from "@/lib/storage";
 import { MODEL_CONFIGS, ModelId } from "@/lib/config";
+import { compressImage } from "@/lib/image-utils";
 
 export function ImageGenerator() {
     // State
@@ -26,6 +27,7 @@ export function ImageGenerator() {
     const [responseMode, setResponseMode] = useState("文本和图像");
     const [enableSearch, setEnableSearch] = useState(false);
     const [numImages, setNumImages] = useState(1);
+    const [enableCompression, setEnableCompression] = useState(true); // 默认启用压缩
 
     // Generation State
     const [loading, setLoading] = useState(false);
@@ -77,6 +79,46 @@ export function ImageGenerator() {
             if (uploadedImages.length > maxImages) {
                 toast.warning(`当前模型最多支持 ${maxImages} 张参考图，已自动截取前 ${maxImages} 张`);
                 imagesToUse = uploadedImages.slice(0, maxImages);
+            }
+
+            // 如果启用压缩，则压缩图片
+            if (enableCompression && imagesToUse.length > 0) {
+                try {
+                    toast.info("正在压缩图片...");
+
+                    // 计算原始总大小
+                    const originalSize = imagesToUse.reduce((sum, img) => sum + img.size, 0);
+
+                    // 压缩图片
+                    const compressedImages = await Promise.all(
+                        imagesToUse.map(img => compressImage(img, {
+                            quality: 0.8,
+                            maxWidth: 1920,
+                            maxHeight: 1920
+                        }))
+                    );
+
+                    // 计算压缩后总大小
+                    const compressedSize = compressedImages.reduce((sum, img) => sum + img.size, 0);
+
+                    // 格式化文件大小
+                    const formatSize = (bytes: number) => {
+                        if (bytes < 1024) return `${bytes} B`;
+                        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+                        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+                    };
+
+                    const savedPercent = ((1 - compressedSize / originalSize) * 100).toFixed(0);
+
+                    imagesToUse = compressedImages;
+                    toast.success(
+                        `图片压缩完成：${formatSize(originalSize)} → ${formatSize(compressedSize)} (节省 ${savedPercent}%)`
+                    );
+                } catch (error) {
+                    console.error("Image compression failed:", error);
+                    toast.warning("图片压缩失败，将使用原图");
+                    // 如果压缩失败，继续使用原图
+                }
             }
 
             const requests = Array(numImages).fill(null).map(() =>
@@ -151,6 +193,8 @@ export function ImageGenerator() {
                         setImages={setUploadedImages}
                         disabled={loading}
                         maxImages={MODEL_CONFIGS[model as ModelId]?.maxInputImages}
+                        enableCompression={enableCompression}
+                        setEnableCompression={setEnableCompression}
                     />
                 </div>
 
