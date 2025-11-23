@@ -88,8 +88,9 @@ export function ImageGenerator() {
                 if (res.images) {
                     results.push(...res.images);
                 }
-                if (res.text) {
-                    if (!combinedText) combinedText = res.text;
+                // 保留textResponse用于纯文本响应显示（虽然现在也会创建占位图）
+                if (res.text && !combinedText) {
+                    combinedText = res.text;
                 }
             });
 

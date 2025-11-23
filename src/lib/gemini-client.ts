@@ -15,6 +15,8 @@ export interface GeneratedImage {
     url: string;
     base64: string;
     mimeType: string;
+    text?: string;         // 该图片对应的文本响应
+    isTextOnly?: boolean;  // 标识这是仅文本的占位图
 }
 
 export interface GenerationResult {
@@ -113,19 +115,44 @@ export class GeminiImageClient {
         if (response.candidates && response.candidates.length > 0) {
             const candidate = response.candidates[0];
             if (candidate.content && candidate.content.parts) {
+                // 首先收集所有文本和图片
+                const imageParts: Array<{ base64: string; mimeType: string }> = [];
+
                 for (const part of candidate.content.parts) {
                     if (part.text) {
                         textParts.push(part.text);
                     } else if (part.inlineData) {
-                        const base64 = part.inlineData.data;
-                        const mimeType = part.inlineData.mimeType || "image/png";
-                        const url = `data:${mimeType};base64,${base64}`;
-                        images.push({
-                            url,
-                            base64,
-                            mimeType,
+                        imageParts.push({
+                            base64: part.inlineData.data,
+                            mimeType: part.inlineData.mimeType || "image/png"
                         });
                     }
+                }
+
+                const combinedText = textParts.join("\n");
+
+                // 如果有图片，将文本关联到每张图片
+                if (imageParts.length > 0) {
+                    for (const imgPart of imageParts) {
+                        const url = `data:${imgPart.mimeType};base64,${imgPart.base64}`;
+                        images.push({
+                            url,
+                            base64: imgPart.base64,
+                            mimeType: imgPart.mimeType,
+                            text: combinedText || undefined,
+                        });
+                    }
+                } else if (combinedText) {
+                    // 如果只有文本没有图片，创建一个1x1黄色占位图
+                    // 1x1黄色PNG的base64 (RGB: 254, 240, 138 - banana-200)
+                    const yellowPixel = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+                    images.push({
+                        url: `data:image/png;base64,${yellowPixel}`,
+                        base64: yellowPixel,
+                        mimeType: "image/png",
+                        text: combinedText,
+                        isTextOnly: true,
+                    });
                 }
             }
         }

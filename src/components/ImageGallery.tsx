@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Download, Maximize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GeneratedImage } from "@/lib/gemini-client";
 import { downloadImage } from "@/lib/image-utils";
@@ -31,7 +30,6 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                         />
                     ))}
                 </div>
-                <div className="h-24 bg-gray-50 rounded-lg animate-pulse" />
             </div>
         );
     }
@@ -57,7 +55,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
 
             {/* Image Grid */}
             {images.length > 0 && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                     {images.map((img, index) => (
                         <div
                             key={index}
@@ -84,9 +82,9 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                     <DialogContent showCloseButton={false} className="max-w-none sm:max-w-none w-screen h-screen max-h-screen p-0 bg-black/20 backdrop-blur-sm border-none shadow-none flex flex-col items-center justify-center">
                         <DialogTitle className="sr-only">查看大图</DialogTitle>
                         <div
-                            className="relative w-full h-full flex items-center justify-center overflow-hidden cursor-pointer"
-                            onClick={() => setSelectedImage(null)}
+                            className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden"
                         >
+                            {/* Close Button */}
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -99,38 +97,63 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                 <X className="w-6 h-6" />
                                 <span className="sr-only">关闭</span>
                             </Button>
-                            <img
-                                src={selectedImage.url}
-                                alt="Full screen preview"
-                                className="w-full h-full object-contain"
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex justify-end">
-                                <Button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        downloadImage(selectedImage.url, `gemini-generated-${Date.now()}.png`);
-                                    }}
-                                    className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border border-white/20"
-                                    size="sm"
+
+                            {/* Image - only show if not text-only */}
+                            {!selectedImage.isTextOnly && (
+                                <div
+                                    className="flex-1 w-full flex items-center justify-center overflow-hidden"
+                                    onClick={() => setSelectedImage(null)}
                                 >
-                                    <Download className="w-4 h-4 mr-2" />
-                                    下载原图
-                                </Button>
+                                    <img
+                                        src={selectedImage.url}
+                                        alt="Full screen preview"
+                                        className="max-w-full max-h-full object-contain"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Text and Download Section */}
+                            <div className="w-full bg-gradient-to-t from-black/80 via-black/60 to-transparent">
+                                {/* Text Content */}
+                                {selectedImage.text && (
+                                    <div
+                                        className="px-6 pt-6 pb-4"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <ScrollArea className={selectedImage.isTextOnly ? "h-[70vh] w-full" : "h-[200px] w-full"}>
+                                            <div className="pr-4">
+                                                <h4 className="text-sm font-semibold text-white/90 mb-2">
+                                                    {selectedImage.isTextOnly ? "文本响应" : "图片描述"}
+                                                </h4>
+                                                <pre className="text-sm text-white/80 whitespace-pre-wrap font-sans">
+                                                    {selectedImage.text}
+                                                </pre>
+                                            </div>
+                                        </ScrollArea>
+                                    </div>
+                                )}
+
+                                {/* Download Button */}
+                                {!selectedImage.isTextOnly && (
+                                    <div className="px-6 pb-6 flex justify-end">
+                                        <Button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                downloadImage(selectedImage.url, `gemini-generated-${Date.now()}.png`);
+                                            }}
+                                            className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border border-white/20"
+                                            size="sm"
+                                        >
+                                            <Download className="w-4 h-4 mr-2" />
+                                            下载原图
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </DialogContent>
                 )}
             </Dialog>
-
-            {/* Text Response */}
-            {textResponse && (
-                <Card className="p-4 bg-white border border-gray-200 shadow-sm">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-2">文本响应</h4>
-                    <ScrollArea className="h-[150px] w-full rounded-md border p-2 bg-gray-50 text-sm text-gray-800">
-                        <pre className="whitespace-pre-wrap font-sans">{textResponse}</pre>
-                    </ScrollArea>
-                </Card>
-            )}
         </div>
     );
 }
