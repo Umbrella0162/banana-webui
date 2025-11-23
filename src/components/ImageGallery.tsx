@@ -231,20 +231,6 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                     <DialogContent showCloseButton={false} className="max-w-none sm:max-w-none w-screen h-screen max-h-screen p-0 bg-black/20 backdrop-blur-sm border-none shadow-none flex flex-col items-center justify-center">
                         <DialogTitle className="sr-only">查看详情</DialogTitle>
                         <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
-                            {/* Close Button */}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute top-4 right-4 z-50 text-white/70 hover:text-white hover:bg-white/10 rounded-full"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedImage(null);
-                                }}
-                            >
-                                <X className="w-6 h-6" />
-                                <span className="sr-only">关闭</span>
-                            </Button>
-
                             {/* Previous Navigation Area */}
                             {images.length > 1 && (
                                 <div
@@ -328,15 +314,15 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                 </div>
                             )}
 
-                            {/* Text Section - Overlay Mode */}
+                            {/* Text Section - Overlay Mode - Can overlap bottom controls */}
                             {selectedImage.text && (
                                 <div
-                                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent px-6 pt-6 pb-20"
+                                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent px-6 pt-6 pb-6"
                                     style={{ zIndex: 41 }}
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <ScrollArea className="h-[200px] w-full">
-                                        <div className="pr-4 relative">
+                                    <ScrollArea className="h-[240px] w-full">
+                                        <div className="pr-4 relative pb-16">
                                             <h4 className="text-sm font-semibold text-white/90 mb-2">
                                                 {selectedImage.text &&
                                                     (selectedImage.text.includes("API 请求失败") || selectedImage.text.includes("请求异常") || selectedImage.text.includes("空响应"))
@@ -352,19 +338,17 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                 </div>
                             )}
 
-
-
-                            {/* Bottom Control Bar */}
+                            {/* Bottom Control Bar - Glassmorphism Style */}
                             {!selectedImage.isTextOnly && (
                                 <div
-                                    className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20"
+                                    className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/30 shadow-lg"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     {/* Zoom Out */}
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
                                         onClick={() => setZoom(prev => Math.max(0.5, prev - 0.5))}
                                         disabled={zoom <= 0.5}
                                         title="缩小"
@@ -378,7 +362,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
                                         onClick={() => {
                                             setZoom(1);
                                             setPosition({ x: 0, y: 0 });
@@ -393,7 +377,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
                                         onClick={() => setZoom(prev => Math.min(3, prev + 0.5))}
                                         disabled={zoom >= 3}
                                         title="放大"
@@ -404,19 +388,36 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                     </Button>
 
                                     {/* Divider */}
-                                    <div className="h-6 w-px bg-white/20 mx-1" />
+                                    <div className="h-6 w-px bg-white/30 mx-1" />
 
                                     {/* Download */}
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
                                         onClick={() => {
                                             downloadImage(selectedImage.url, `gemini-generated-${Date.now()}.png`);
                                         }}
                                         title="下载"
                                     >
                                         <Download className="w-4 h-4" />
+                                    </Button>
+
+                                    {/* Divider */}
+                                    <div className="h-6 w-px bg-white/30 mx-1" />
+
+                                    {/* Close Button */}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedImage(null);
+                                        }}
+                                        title="关闭"
+                                    >
+                                        <X className="w-4 h-4" />
                                     </Button>
                                 </div>
                             )}
