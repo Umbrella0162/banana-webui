@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Download, Maximize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +17,18 @@ interface ImageGalleryProps {
 
 export function ImageGallery({ images, textResponse, loading, numImages = 4 }: ImageGalleryProps) {
     const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
+    const [zoom, setZoom] = useState(1);
+    const [isDragging, setIsDragging] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+    // Reset zoom and position when opening a new image
+    useEffect(() => {
+        if (selectedImage) {
+            setZoom(1);
+            setPosition({ x: 0, y: 0 });
+        }
+    }, [selectedImage]);
 
     if (loading) {
         return (
@@ -77,13 +89,17 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                 </div>
             )}
 
-            <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+            <Dialog open={!!selectedImage} onOpenChange={(open) => {
+                if (!open) {
+                    setSelectedImage(null);
+                    setZoom(1);
+                    setPosition({ x: 0, y: 0 });
+                }
+            }}>
                 {selectedImage && (
                     <DialogContent showCloseButton={false} className="max-w-none sm:max-w-none w-screen h-screen max-h-screen p-0 bg-black/20 backdrop-blur-sm border-none shadow-none flex flex-col items-center justify-center">
                         <DialogTitle className="sr-only">查看大图</DialogTitle>
-                        <div
-                            className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden"
-                        >
+                        <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
                             {/* Close Button */}
                             <Button
                                 variant="ghost"
@@ -98,58 +114,184 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                 <span className="sr-only">关闭</span>
                             </Button>
 
+                            {/* Previous Button */}
+                            {images.length > 1 && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        const currentIndex = images.findIndex(img => img === selectedImage);
+                                        const prevIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+                                        setSelectedImage(images[prevIndex]);
+                                        setZoom(1);
+                                        setPosition({ x: 0, y: 0 });
+                                    }}
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    <span className="sr-only">上一张</span>
+                                </Button>
+                            )}
+
+                            {/* Next Button */}
+                            {images.length > 1 && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        const currentIndex = images.findIndex(img => img === selectedImage);
+                                        const nextIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+                                        setSelectedImage(images[nextIndex]);
+                                        setZoom(1);
+                                        setPosition({ x: 0, y: 0 });
+                                    }}
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    <span className="sr-only">下一张</span>
+                                </Button>
+                            )}
+
                             {/* Image - only show if not text-only */}
                             {!selectedImage.isTextOnly && (
                                 <div
-                                    className="flex-1 w-full flex items-center justify-center overflow-hidden"
-                                    onClick={() => setSelectedImage(null)}
+                                    className="absolute inset-0 flex items-center justify-center p-16"
+                                    style={{
+                                        cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+                                        zIndex: 10
+                                    }}
+                                    onMouseDown={(e) => {
+                                        if (zoom > 1) {
+                                            setIsDragging(true);
+                                            setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+                                        }
+                                    }}
+                                    onMouseMove={(e) => {
+                                        if (isDragging && zoom > 1) {
+                                            setPosition({
+                                                x: e.clientX - dragStart.x,
+                                                y: e.clientY - dragStart.y
+                                            });
+                                        }
+                                    }}
+                                    onMouseUp={() => setIsDragging(false)}
+                                    onMouseLeave={() => setIsDragging(false)}
+                                    onWheel={(e) => {
+                                        e.preventDefault();
+                                        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                                        setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
+                                    }}
+                                    onClick={(e) => {
+                                        if (!isDragging && zoom === 1) {
+                                            setSelectedImage(null);
+                                        }
+                                    }}
                                 >
                                     <img
                                         src={selectedImage.url}
                                         alt="Full screen preview"
-                                        className="max-w-full max-h-full object-contain"
+                                        className="max-w-full max-h-full object-contain transition-transform select-none"
+                                        style={{
+                                            transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                                            transitionDuration: isDragging ? '0ms' : '200ms'
+                                        }}
+                                        draggable={false}
                                     />
                                 </div>
                             )}
 
-                            {/* Text and Download Section */}
-                            <div className="w-full bg-gradient-to-t from-black/80 via-black/60 to-transparent">
-                                {/* Text Content */}
-                                {selectedImage.text && (
-                                    <div
-                                        className="px-6 pt-6 pb-4"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <ScrollArea className={selectedImage.isTextOnly ? "h-[70vh] w-full" : "h-[200px] w-full"}>
-                                            <div className="pr-4">
-                                                <h4 className="text-sm font-semibold text-white/90 mb-2">
-                                                    {selectedImage.isTextOnly ? "文本响应" : "图片描述"}
-                                                </h4>
-                                                <pre className="text-sm text-white/80 whitespace-pre-wrap font-sans">
-                                                    {selectedImage.text}
-                                                </pre>
-                                            </div>
-                                        </ScrollArea>
-                                    </div>
-                                )}
+                            {/* Text Section - can be overlapped by zoomed image */}
+                            {selectedImage.text && (
+                                <div
+                                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent px-6 pt-6 pb-20"
+                                    style={{ zIndex: 5 }}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <ScrollArea className={selectedImage.isTextOnly ? "h-[60vh] w-full" : "h-[150px] w-full"}>
+                                        <div className="pr-4">
+                                            <h4 className="text-sm font-semibold text-white/90 mb-2">
+                                                文本响应
+                                            </h4>
+                                            <pre className="text-sm text-white/80 whitespace-pre-wrap font-sans">
+                                                {selectedImage.text}
+                                            </pre>
+                                        </div>
+                                    </ScrollArea>
+                                </div>
+                            )}
 
-                                {/* Download Button */}
-                                {!selectedImage.isTextOnly && (
-                                    <div className="px-6 pb-6 flex justify-end">
-                                        <Button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                downloadImage(selectedImage.url, `gemini-generated-${Date.now()}.png`);
-                                            }}
-                                            className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border border-white/20"
-                                            size="sm"
-                                        >
-                                            <Download className="w-4 h-4 mr-2" />
-                                            下载原图
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
+                            {/* Bottom Control Bar */}
+                            {!selectedImage.isTextOnly && (
+                                <div
+                                    className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {/* Zoom Out */}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                                        onClick={() => setZoom(prev => Math.max(0.5, prev - 0.25))}
+                                        disabled={zoom <= 0.5}
+                                        title="缩小"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                                        </svg>
+                                    </Button>
+
+                                    {/* Reset Zoom */}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                                        onClick={() => {
+                                            setZoom(1);
+                                            setPosition({ x: 0, y: 0 });
+                                        }}
+                                        disabled={zoom === 1}
+                                        title="重置"
+                                    >
+                                        <span className="text-xs font-medium">{Math.round(zoom * 100)}%</span>
+                                    </Button>
+
+                                    {/* Zoom In */}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                                        onClick={() => setZoom(prev => Math.min(3, prev + 0.25))}
+                                        disabled={zoom >= 3}
+                                        title="放大"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                                        </svg>
+                                    </Button>
+
+                                    {/* Divider */}
+                                    <div className="h-6 w-px bg-white/20 mx-1" />
+
+                                    {/* Download */}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                                        onClick={() => {
+                                            downloadImage(selectedImage.url, `gemini-generated-${Date.now()}.png`);
+                                        }}
+                                        title="下载"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </DialogContent>
                 )}
