@@ -49,7 +49,10 @@ export class GeminiImageClient {
         }
 
         if (images && images.length > 0) {
-            for (const img of images) {
+            // Reverse images so the first one in the UI list becomes the last one sent to API
+            // (User observation: Last image is main reference)
+            const reversedImages = [...images].reverse();
+            for (const img of reversedImages) {
                 const base64 = await fileToBase64(img);
                 // Add image part
                 parts.push({

@@ -71,6 +71,39 @@ export function ImageUploader({ images, setImages, disabled, maxImages = 14 }: I
         setImages(newImages);
     };
 
+    // Sorting Logic
+    const dragItem = useRef<number | null>(null);
+    const [activeDragIndex, setActiveDragIndex] = useState<number | null>(null);
+
+    const handleSortStart = (e: React.DragEvent, position: number) => {
+        if (disabled) return;
+        dragItem.current = position;
+        setActiveDragIndex(position);
+        // e.dataTransfer.effectAllowed = "move";
+    };
+
+    const handleSortEnter = (e: React.DragEvent, position: number) => {
+        if (disabled) return;
+        e.preventDefault();
+
+        // Use ref for logic to avoid closure staleness issues during rapid events
+        if (dragItem.current !== null && dragItem.current !== position) {
+            const newImages = [...images];
+            const draggedItemContent = newImages[dragItem.current];
+            newImages.splice(dragItem.current, 1);
+            newImages.splice(position, 0, draggedItemContent);
+
+            setImages(newImages);
+            dragItem.current = position;
+            setActiveDragIndex(position);
+        }
+    };
+
+    const handleSortEnd = (e: React.DragEvent) => {
+        dragItem.current = null;
+        setActiveDragIndex(null);
+    };
+
     return (
         <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">参考图像 (可选)</Label>
@@ -109,13 +142,31 @@ export function ImageUploader({ images, setImages, disabled, maxImages = 14 }: I
             {images.length > 0 && (
                 <div className="grid grid-cols-3 gap-2 mt-4">
                     {images.map((file, index) => (
-                        <div key={`${file.name}-${index}`} className="relative group aspect-square">
+                        <div
+                            key={`${file.name}-${file.size}-${file.lastModified}`}
+                            className={cn(
+                                "relative group aspect-square cursor-move transition-all duration-200 ease-in-out active:scale-95",
+                                disabled && "cursor-not-allowed opacity-75",
+                                activeDragIndex === index && "opacity-50 scale-95 ring-2 ring-banana-400 ring-offset-2"
+                            )}
+                            draggable={!disabled}
+                            onDragStart={(e) => handleSortStart(e, index)}
+                            onDragEnter={(e) => handleSortEnter(e, index)}
+                            onDragEnd={handleSortEnd}
+                            onDragOver={(e) => e.preventDefault()} // Necessary for onDrop/onDragEnter to work smoothly
+                        >
                             <img
                                 src={URL.createObjectURL(file)}
                                 alt={`preview ${index}`}
-                                className="w-full h-full object-cover rounded-md border border-gray-200"
+                                className="w-full h-full object-cover rounded-md border border-gray-200 pointer-events-none select-none"
                                 onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
                             />
+                            <div className={cn(
+                                "absolute top-1 left-1 text-white text-xs px-1.5 py-0.5 rounded-md transition-opacity pointer-events-none opacity-0 group-hover:opacity-100",
+                                index === 0 ? "bg-black/60 font-medium" : "bg-black/50"
+                            )}>
+                                {index === 0 ? "主参考" : index + 1}
+                            </div>
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
