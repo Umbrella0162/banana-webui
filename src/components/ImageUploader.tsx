@@ -9,9 +9,10 @@ interface ImageUploaderProps {
     images: File[];
     setImages: (images: File[]) => void;
     disabled?: boolean;
+    maxImages?: number;
 }
 
-export function ImageUploader({ images, setImages, disabled }: ImageUploaderProps) {
+export function ImageUploader({ images, setImages, disabled, maxImages = 14 }: ImageUploaderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,11 +51,11 @@ export function ImageUploader({ images, setImages, disabled }: ImageUploaderProp
     };
 
     const addFiles = (newFiles: File[]) => {
-        // Limit total images to 14 (Gemini limit)
+        // Limit total images to maxImages
         const totalImages = images.length + newFiles.length;
-        if (totalImages > 14) {
-            alert("最多只能上传 14 张参考图像");
-            const allowedCount = 14 - images.length;
+        if (totalImages > maxImages) {
+            alert(`最多只能上传 ${maxImages} 张参考图像`);
+            const allowedCount = maxImages - images.length;
             if (allowedCount > 0) {
                 setImages([...images, ...newFiles.slice(0, allowedCount)]);
             }
@@ -100,7 +101,7 @@ export function ImageUploader({ images, setImages, disabled }: ImageUploaderProp
                     拖拽图像到此处或点击上传
                 </p>
                 <p className="text-xs text-gray-400 text-center mt-1">
-                    支持 JPG, PNG, WEBP (最多14张)
+                    支持 JPG, PNG, WEBP (最多{maxImages}张)
                 </p>
             </div>
 

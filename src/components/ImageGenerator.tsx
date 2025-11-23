@@ -69,11 +69,21 @@ export function ImageGenerator() {
             const results: GeneratedImage[] = [];
             let combinedText = "";
 
+            // Check and enforce image limit
+            const modelConfig = MODEL_CONFIGS[model as ModelId];
+            const maxImages = modelConfig?.maxInputImages || 14;
+            let imagesToUse = uploadedImages;
+
+            if (uploadedImages.length > maxImages) {
+                toast.warning(`当前模型最多支持 ${maxImages} 张参考图，已自动截取前 ${maxImages} 张`);
+                imagesToUse = uploadedImages.slice(0, maxImages);
+            }
+
             const requests = Array(numImages).fill(null).map(() =>
                 client.generateImage({
                     model,
                     prompt,
-                    images: uploadedImages,
+                    images: imagesToUse,
                     aspectRatio,
                     resolution,
                     enableSearch,
@@ -140,6 +150,7 @@ export function ImageGenerator() {
                         images={uploadedImages}
                         setImages={setUploadedImages}
                         disabled={loading}
+                        maxImages={MODEL_CONFIGS[model as ModelId]?.maxInputImages}
                     />
                 </div>
 

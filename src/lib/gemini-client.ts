@@ -41,17 +41,18 @@ export class GeminiImageClient {
         // Pattern: https://{endpoint}/v1beta/models/{model}:generateContent?key={apiKey}
         const url = `${this.apiEndpoint}/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
 
-        // Prepare contents
-        const contents: any[] = [{
-            role: "user",
-            parts: [{ text: prompt }]
-        }];
+        // Prepare parts
+        const parts: any[] = [];
+
+        if (prompt && prompt.trim()) {
+            parts.push({ text: prompt });
+        }
 
         if (images && images.length > 0) {
             for (const img of images) {
                 const base64 = await fileToBase64(img);
                 // Add image part
-                contents[0].parts.push({
+                parts.push({
                     inlineData: {
                         mimeType: img.type,
                         data: base64,
@@ -59,6 +60,11 @@ export class GeminiImageClient {
                 });
             }
         }
+
+        const contents: any[] = [{
+            role: "user",
+            parts: parts
+        }];
 
         // Prepare config
         const generationConfig: any = {

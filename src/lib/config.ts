@@ -4,18 +4,21 @@ export const MODEL_CONFIGS = {
         resolutions: ["1K"],
         maxResolution: "1K",
         supportsSearch: true,
+        maxInputImages: 3,
     },
     "gemini-3-pro-image-preview": {
         displayName: "Gemini 3 Pro (Nano Banana Pro)",
         resolutions: ["1K", "2K", "4K"],
         maxResolution: "4K",
         supportsSearch: true,
+        maxInputImages: 14,
     },
     "nano-banana-pro-preview": {
         displayName: "Nano Banana Pro Preview",
         resolutions: ["1K", "2K", "4K"],
         maxResolution: "4K",
         supportsSearch: true,
+        maxInputImages: 14,
     },
 } as const;
 
