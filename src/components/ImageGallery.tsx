@@ -311,10 +311,14 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                     style={{ zIndex: 5 }}
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <ScrollArea className={selectedImage.isTextOnly ? "h-[60vh] w-full" : "h-[150px] w-full"}>
+                                    <ScrollArea className="h-[200px] w-full">
                                         <div className="pr-4">
                                             <h4 className="text-sm font-semibold text-white/90 mb-2">
-                                                文本响应
+                                                {selectedImage.text &&
+                                                    (selectedImage.text.includes("API 请求失败") || selectedImage.text.includes("请求异常") || selectedImage.text.includes("空响应"))
+                                                    ? "错误信息"
+                                                    : "文本响应"
+                                                }
                                             </h4>
                                             <pre className="text-sm text-white/80 whitespace-pre-wrap font-sans">
                                                 {selectedImage.text}

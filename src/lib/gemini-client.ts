@@ -106,15 +106,38 @@ export class GeminiImageClient {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`API Request Failed: ${response.status} ${response.statusText} - ${errorText}`);
+                const errorMessage = `API 请求失败 (${response.status}):\n${errorText}`;
+                console.error("Gemini API Error:", errorMessage);
+
+                // 返回错误信息作为文本响应,而不是抛出异常
+                return this.createTextOnlyResult(errorMessage);
             }
 
             const data = await response.json();
             return this.extractResults(data);
         } catch (error) {
             console.error("Gemini API Error:", error);
-            throw error;
+            const errorMessage = error instanceof Error ? error.message : String(error);
+
+            // 将所有错误转换为文本响应
+            return this.createTextOnlyResult(`请求异常:\n${errorMessage}`);
         }
+    }
+
+    private createTextOnlyResult(text: string): GenerationResult {
+        // 创建一个1x1黄色占位图 (RGB: 254, 240, 138 - banana-200)
+        const yellowPixel = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+
+        return {
+            images: [{
+                url: `data:image/png;base64,${yellowPixel}`,
+                base64: yellowPixel,
+                mimeType: "image/png",
+                text: text,
+                isTextOnly: true,
+            }],
+            text: text,
+        };
     }
 
     private extractResults(response: any): GenerationResult {
@@ -164,6 +187,18 @@ export class GeminiImageClient {
                     });
                 }
             }
+        }
+
+        // 如果既没有图片也没有文本,创建一个空响应占位图
+        if (images.length === 0 && textParts.length === 0) {
+            const yellowPixel = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+            images.push({
+                url: `data:image/png;base64,${yellowPixel}`,
+                base64: yellowPixel,
+                mimeType: "image/png",
+                text: "API 返回了空响应",
+                isTextOnly: true,
+            });
         }
 
         return {
