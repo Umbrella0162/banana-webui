@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Download, Maximize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -22,6 +22,72 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+    useEffect(() => {
+        if (!isDragging) return;
+
+        const handleMouseMove = (e: MouseEvent) => {
+            if (zoom > 1) {
+                e.preventDefault();
+                const newX = e.clientX - dragStart.x;
+                const newY = e.clientY - dragStart.y;
+                setPosition({ x: newX, y: newY });
+            }
+        };
+
+        const handleMouseUp = (e: MouseEvent) => {
+            setIsDragging(false);
+
+            // Bounce back logic
+            if (zoom > 1) {
+                const containerWidth = window.innerWidth;
+                const containerHeight = window.innerHeight;
+
+                const img = document.querySelector('.zoomable-image') as HTMLImageElement;
+                if (img) {
+                    const rect = img.getBoundingClientRect();
+                    const currentWidth = rect.width;
+                    const currentHeight = rect.height;
+
+                    // Calculate the final position based on the mouse up event
+                    const currentX = e.clientX - dragStart.x;
+                    const currentY = e.clientY - dragStart.y;
+
+                    let newX = currentX;
+                    let newY = currentY;
+
+                    // Horizontal Bounds
+                    if (currentWidth <= containerWidth) {
+                        newX = 0;
+                    } else {
+                        const maxOffset = (currentWidth - containerWidth) / 2;
+                        if (newX > maxOffset) newX = maxOffset;
+                        if (newX < -maxOffset) newX = -maxOffset;
+                    }
+
+                    // Vertical Bounds
+                    if (currentHeight <= containerHeight) {
+                        newY = 0;
+                    } else {
+                        const maxOffset = (currentHeight - containerHeight) / 2;
+                        if (newY > maxOffset) newY = maxOffset;
+                        if (newY < -maxOffset) newY = -maxOffset;
+                    }
+
+                    // Always update position to ensure it snaps to bounds or stays at the final drag position
+                    setPosition({ x: newX, y: newY });
+                }
+            }
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, zoom, dragStart]);
+
     // Reset zoom and position when opening a new image
     useEffect(() => {
         if (selectedImage) {
@@ -29,6 +95,48 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
             setPosition({ x: 0, y: 0 });
         }
     }, [selectedImage]);
+
+    // Clamp position when zooming out
+    useEffect(() => {
+        if (zoom > 1) {
+            const img = document.querySelector('.zoomable-image') as HTMLImageElement;
+            if (img) {
+                const rect = img.getBoundingClientRect();
+                const containerWidth = window.innerWidth;
+                const containerHeight = window.innerHeight;
+                const currentWidth = rect.width;
+                const currentHeight = rect.height;
+
+                let newX = position.x;
+                let newY = position.y;
+
+                if (currentWidth <= containerWidth) {
+                    newX = 0;
+                } else {
+                    const maxOffset = (currentWidth - containerWidth) / 2;
+                    if (newX > maxOffset) newX = maxOffset;
+                    if (newX < -maxOffset) newX = -maxOffset;
+                }
+
+                if (currentHeight <= containerHeight) {
+                    newY = 0;
+                } else {
+                    const maxOffset = (currentHeight - containerHeight) / 2;
+                    if (newY > maxOffset) newY = maxOffset;
+                    if (newY < -maxOffset) newY = -maxOffset;
+                }
+
+                if (newX !== position.x || newY !== position.y) {
+                    setPosition({ x: newX, y: newY });
+                }
+            }
+        } else {
+            // Reset position if zoom is 1 or less
+            if (position.x !== 0 || position.y !== 0) {
+                setPosition({ x: 0, y: 0 });
+            }
+        }
+    }, [zoom]);
 
     if (loading) {
         return (
@@ -172,34 +280,24 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                             setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
                                         }
                                     }}
-                                    onMouseMove={(e) => {
-                                        if (isDragging && zoom > 1) {
-                                            setPosition({
-                                                x: e.clientX - dragStart.x,
-                                                y: e.clientY - dragStart.y
-                                            });
-                                        }
-                                    }}
-                                    onMouseUp={() => setIsDragging(false)}
-                                    onMouseLeave={() => setIsDragging(false)}
-                                    onWheel={(e) => {
-                                        e.preventDefault();
-                                        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-                                        setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
-                                    }}
                                     onClick={(e) => {
                                         if (!isDragging && zoom === 1) {
                                             setSelectedImage(null);
                                         }
                                     }}
+                                    onWheel={(e) => {
+                                        e.preventDefault();
+                                        const delta = e.deltaY > 0 ? -0.25 : 0.25;
+                                        setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
+                                    }}
                                 >
                                     <img
                                         src={selectedImage.url}
                                         alt="Full screen preview"
-                                        className="max-w-full max-h-full object-contain transition-transform select-none"
+                                        className="zoomable-image max-w-full max-h-full object-contain transition-transform select-none"
                                         style={{
-                                            transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-                                            transitionDuration: isDragging ? '0ms' : '200ms'
+                                            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                                            transition: isDragging ? 'none' : 'transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1)'
                                         }}
                                         draggable={false}
                                     />
@@ -237,7 +335,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                         variant="ghost"
                                         size="icon"
                                         className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
-                                        onClick={() => setZoom(prev => Math.max(0.5, prev - 0.25))}
+                                        onClick={() => setZoom(prev => Math.max(0.5, prev - 0.5))}
                                         disabled={zoom <= 0.5}
                                         title="缩小"
                                     >
@@ -246,7 +344,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                         </svg>
                                     </Button>
 
-                                    {/* Reset Zoom */}
+                                    {/* Reset Zoom and Position */}
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -255,8 +353,8 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                             setZoom(1);
                                             setPosition({ x: 0, y: 0 });
                                         }}
-                                        disabled={zoom === 1}
-                                        title="重置"
+                                        disabled={zoom === 1 && position.x === 0 && position.y === 0}
+                                        title="重置位置和缩放"
                                     >
                                         <span className="text-xs font-medium">{Math.round(zoom * 100)}%</span>
                                     </Button>
@@ -266,7 +364,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                         variant="ghost"
                                         size="icon"
                                         className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
-                                        onClick={() => setZoom(prev => Math.min(3, prev + 0.25))}
+                                        onClick={() => setZoom(prev => Math.min(3, prev + 0.5))}
                                         disabled={zoom >= 3}
                                         title="放大"
                                     >
