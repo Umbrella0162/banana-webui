@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, Maximize2, X } from "lucide-react";
+import { Download, Maximize2, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -92,6 +92,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
     useEffect(() => {
         if (selectedImage) {
             setZoom(1);
+            setPosition({ x: 0, y: 0 });
             setPosition({ x: 0, y: 0 });
         }
     }, [selectedImage]);
@@ -185,15 +186,32 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                 setSelectedImage(img);
                             }}
                         >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={img.url}
-                                alt={`Generated ${index + 1}`}
-                                className="w-full h-auto object-contain bg-gray-50 aspect-square"
-                            />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                <Maximize2 className="text-white w-6 h-6 drop-shadow-md" />
-                            </div>
+                            {img.isTextOnly ? (
+                                <div className="w-full aspect-square bg-banana-50 p-4 flex flex-col overflow-hidden">
+                                    <div className="flex items-center gap-2 text-banana-600 mb-2">
+                                        <FileText className="w-5 h-5" />
+                                        <span className="text-sm font-medium">文本响应</span>
+                                    </div>
+                                    <div className="flex-1 overflow-hidden relative">
+                                        <p className="text-sm text-gray-600 line-clamp-[8] whitespace-pre-wrap font-sans">
+                                            {img.text}
+                                        </p>
+                                        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-banana-50 to-transparent" />
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={img.url}
+                                        alt={`Generated ${index + 1}`}
+                                        className="w-full h-auto object-contain bg-gray-50 aspect-square"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                        <Maximize2 className="text-white w-6 h-6 drop-shadow-md" />
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -204,11 +222,13 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                     setSelectedImage(null);
                     setZoom(1);
                     setPosition({ x: 0, y: 0 });
+                    setZoom(1);
+                    setPosition({ x: 0, y: 0 });
                 }
             }}>
                 {selectedImage && (
                     <DialogContent showCloseButton={false} className="max-w-none sm:max-w-none w-screen h-screen max-h-screen p-0 bg-black/20 backdrop-blur-sm border-none shadow-none flex flex-col items-center justify-center">
-                        <DialogTitle className="sr-only">查看大图</DialogTitle>
+                        <DialogTitle className="sr-only">查看详情</DialogTitle>
                         <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
                             {/* Close Button */}
                             <Button
@@ -307,15 +327,15 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                 </div>
                             )}
 
-                            {/* Text Section - can be overlapped by zoomed image */}
+                            {/* Text Section - Overlay Mode */}
                             {selectedImage.text && (
                                 <div
                                     className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent px-6 pt-6 pb-20"
-                                    style={{ zIndex: 5 }}
+                                    style={{ zIndex: 41 }}
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     <ScrollArea className="h-[200px] w-full">
-                                        <div className="pr-4">
+                                        <div className="pr-4 relative">
                                             <h4 className="text-sm font-semibold text-white/90 mb-2">
                                                 {selectedImage.text &&
                                                     (selectedImage.text.includes("API 请求失败") || selectedImage.text.includes("请求异常") || selectedImage.text.includes("空响应"))
@@ -323,13 +343,15 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                                     : "文本响应"
                                                 }
                                             </h4>
-                                            <pre className="text-sm text-white/80 whitespace-pre-wrap font-sans">
+                                            <div className="text-sm text-white/80 whitespace-pre-wrap font-sans">
                                                 {selectedImage.text}
-                                            </pre>
+                                            </div>
                                         </div>
                                     </ScrollArea>
                                 </div>
                             )}
+
+
 
                             {/* Bottom Control Bar */}
                             {!selectedImage.isTextOnly && (
@@ -404,3 +426,5 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
         </div>
     );
 }
+
+
