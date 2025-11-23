@@ -29,10 +29,10 @@ export function PromptInput({ value, onChange, disabled }: PromptInputProps) {
     const [open, setOpen] = useState(false);
     const [tempValue, setTempValue] = useState(value);
 
-    // Sync tempValue with value when dialog opens
+    // Sync tempValue with value when dialog opens - use queueMicrotask to avoid sync setState
     useEffect(() => {
         if (open) {
-            setTempValue(value);
+            queueMicrotask(() => setTempValue(value));
         }
     }, [open, value]);
 

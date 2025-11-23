@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
@@ -109,7 +109,7 @@ export function ImageUploader({
         }
     };
 
-    const handleSortEnd = (e: React.DragEvent) => {
+    const handleSortEnd = () => {
         dragItem.current = null;
         setActiveDragIndex(null);
     };
@@ -182,6 +182,7 @@ export function ImageUploader({
                             onDragEnd={handleSortEnd}
                             onDragOver={(e) => e.preventDefault()} // Necessary for onDrop/onDragEnter to work smoothly
                         >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={URL.createObjectURL(file)}
                                 alt={`preview ${index}`}

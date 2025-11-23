@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Key, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,17 +10,9 @@ import { StorageManager } from "@/lib/storage";
 import { toast } from "sonner";
 
 export function ApiKeyInput() {
-    const [apiKey, setApiKey] = useState("");
+    const [apiKey, setApiKey] = useState(() => StorageManager.getApiKey() || "");
     const [showKey, setShowKey] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
-
-    useEffect(() => {
-        const savedKey = StorageManager.getApiKey();
-        if (savedKey) {
-            setApiKey(savedKey);
-            setIsSaved(true);
-        }
-    }, []);
+    const [isSaved, setIsSaved] = useState(() => !!StorageManager.getApiKey());
 
     const handleSave = () => {
         if (!apiKey.trim()) {

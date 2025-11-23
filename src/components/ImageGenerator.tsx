@@ -35,16 +35,17 @@ export function ImageGenerator() {
     const [textResponse, setTextResponse] = useState("");
 
     // Reset resolution when model changes if not supported
+    // Reset resolution when model changes if not supported
     useEffect(() => {
         const config = MODEL_CONFIGS[model as ModelId];
         if (config && resolution !== "不设置" && !(config.resolutions as readonly string[]).includes(resolution)) {
-            setResolution("不设置");
+            queueMicrotask(() => setResolution("不设置"));
         }
         // Also reset search if not supported
         if (config && !config.supportsSearch && enableSearch) {
-            setEnableSearch(false);
+            queueMicrotask(() => setEnableSearch(false));
         }
-    }, [model]);
+    }, [model, resolution, enableSearch]);
 
     const handleGenerate = async () => {
         const apiKey = StorageManager.getApiKey();

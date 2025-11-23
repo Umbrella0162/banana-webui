@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Download, Maximize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -136,6 +136,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                 setPosition({ x: 0, y: 0 });
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [zoom]);
 
     if (loading) {
@@ -184,6 +185,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                 setSelectedImage(img);
                             }}
                         >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={img.url}
                                 alt={`Generated ${index + 1}`}
@@ -280,7 +282,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                             setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
                                         }
                                     }}
-                                    onClick={(e) => {
+                                    onClick={() => {
                                         if (!isDragging && zoom === 1) {
                                             setSelectedImage(null);
                                         }
@@ -291,6 +293,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                         setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
                                     }}
                                 >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={selectedImage.url}
                                         alt="Full screen preview"

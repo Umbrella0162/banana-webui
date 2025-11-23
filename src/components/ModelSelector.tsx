@@ -9,7 +9,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { MODEL_CONFIGS, ModelId } from "@/lib/config";
+import { MODEL_CONFIGS } from "@/lib/config";
 
 interface ModelSelectorProps {
     value: string;

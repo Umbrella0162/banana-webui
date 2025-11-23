@@ -24,6 +24,49 @@ export interface GenerationResult {
     text: string;
 }
 
+// Gemini API 请求和响应类型定义
+interface InlineData {
+    mimeType: string;
+    data: string;
+}
+
+interface ContentPart {
+    text?: string;
+    inlineData?: InlineData;
+}
+
+interface Content {
+    role: string;
+    parts: ContentPart[];
+}
+
+interface ImageConfig {
+    aspectRatio?: string;
+    imageSize?: string;
+}
+
+interface GenerationConfig {
+    responseModalities: string[];
+    imageConfig?: ImageConfig;
+}
+
+interface ApiPayload {
+    contents: Content[];
+    generationConfig: GenerationConfig;
+    tools?: Array<{ googleSearch: Record<string, never> }>;
+}
+
+interface ApiResponse {
+    candidates?: Array<{
+        content?: {
+            parts?: Array<{
+                text?: string;
+                inlineData?: InlineData;
+            }>;
+        };
+    }>;
+}
+
 export class GeminiImageClient {
     private apiKey: string;
     private apiEndpoint: string;
@@ -42,7 +85,7 @@ export class GeminiImageClient {
         const url = `${this.apiEndpoint}/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
 
         // Prepare parts
-        const parts: any[] = [];
+        const parts: ContentPart[] = [];
 
         if (prompt && prompt.trim()) {
             parts.push({ text: prompt });
@@ -64,17 +107,17 @@ export class GeminiImageClient {
             }
         }
 
-        const contents: any[] = [{
+        const contents: Content[] = [{
             role: "user",
             parts: parts
         }];
 
         // Prepare config
-        const generationConfig: any = {
+        const generationConfig: GenerationConfig = {
             responseModalities: ["TEXT", "IMAGE"],
         };
 
-        const imageConfig: any = {};
+        const imageConfig: ImageConfig = {};
         if (aspectRatio && aspectRatio !== "不设置") {
             imageConfig.aspectRatio = aspectRatio;
         }
@@ -86,7 +129,7 @@ export class GeminiImageClient {
             generationConfig.imageConfig = imageConfig;
         }
 
-        const payload: any = {
+        const payload: ApiPayload = {
             contents,
             generationConfig,
         };
@@ -140,7 +183,7 @@ export class GeminiImageClient {
         };
     }
 
-    private extractResults(response: any): GenerationResult {
+    private extractResults(response: ApiResponse): GenerationResult {
         const images: GeneratedImage[] = [];
         const textParts: string[] = [];
 

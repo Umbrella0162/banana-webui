@@ -22,10 +22,14 @@ export function SettingsDialog() {
     const [apiKey, setApiKey] = useState("");
     const [endpoint, setEndpoint] = useState("");
 
+    // Load stored values when dialog opens
     useEffect(() => {
         if (open) {
-            setApiKey(StorageManager.getApiKey() || "");
-            setEndpoint(StorageManager.getEndpoint() || "");
+            // Use queueMicrotask to defer state updates and avoid sync setState warnings
+            queueMicrotask(() => {
+                setApiKey(StorageManager.getApiKey() || "");
+                setEndpoint(StorageManager.getEndpoint() || "");
+            });
         }
     }, [open]);
 
