@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GeneratedImage } from "@/lib/gemini-client";
 import { downloadImage } from "@/lib/image-utils";
+import ReactMarkdown from "react-markdown";
 
 interface ImageGalleryProps {
     images: GeneratedImage[];
@@ -193,9 +194,9 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                         <span className="text-sm font-medium">文本响应</span>
                                     </div>
                                     <div className="flex-1 overflow-hidden relative">
-                                        <p className="text-sm text-gray-600 line-clamp-[8] whitespace-pre-wrap font-sans">
-                                            {img.text}
-                                        </p>
+                                        <div className="text-sm text-gray-600 line-clamp-[8] font-sans prose prose-sm max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-a:text-banana-600 prose-code:text-banana-700 prose-code:bg-banana-100 prose-code:px-1 prose-code:rounded">
+                                            <ReactMarkdown>{img.text || ''}</ReactMarkdown>
+                                        </div>
                                         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-banana-50 to-transparent" />
                                     </div>
                                 </div>
@@ -343,8 +344,8 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                                     : "文本响应"
                                                 }
                                             </h4>
-                                            <div className="text-sm text-white/80 whitespace-pre-wrap font-sans">
-                                                {selectedImage.text}
+                                            <div className="text-sm text-white/90 font-sans prose prose-sm prose-invert max-w-none prose-headings:text-white prose-p:text-white/90 prose-a:text-banana-300 prose-strong:text-white prose-code:text-banana-200 prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-white/10 prose-pre:border prose-pre:border-white/20">
+                                                <ReactMarkdown>{selectedImage.text}</ReactMarkdown>
                                             </div>
                                         </div>
                                     </ScrollArea>

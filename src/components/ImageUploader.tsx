@@ -189,11 +189,8 @@ export function ImageUploader({
                                 className="w-full h-full object-cover rounded-md border border-gray-200 pointer-events-none select-none"
                                 onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
                             />
-                            <div className={cn(
-                                "absolute top-1 left-1 text-white text-xs px-1.5 py-0.5 rounded-md transition-opacity pointer-events-none opacity-0 group-hover:opacity-100",
-                                index === 0 ? "bg-black/60 font-medium" : "bg-black/50"
-                            )}>
-                                {index === 0 ? "主参考" : index + 1}
+                            <div className="absolute top-1 left-1 text-white text-xs px-1.5 py-0.5 rounded-md transition-opacity pointer-events-none opacity-0 group-hover:opacity-100 bg-black/60 font-medium">
+                                {index + 1}
                             </div>
                             <button
                                 onClick={(e) => {
