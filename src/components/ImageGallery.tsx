@@ -222,12 +222,10 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                 <span className="sr-only">关闭</span>
                             </Button>
 
-                            {/* Previous Button */}
+                            {/* Previous Navigation Area */}
                             {images.length > 1 && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                                <div
+                                    className="absolute left-0 top-0 bottom-0 w-24 z-40 flex items-center justify-center group/nav cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-black/40 hover:to-transparent"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         const currentIndex = images.findIndex(img => img === selectedImage);
@@ -237,19 +235,19 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                         setPosition({ x: 0, y: 0 });
                                     }}
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
+                                    <div className="opacity-0 -translate-x-4 group-hover/nav:opacity-100 group-hover/nav:translate-x-0 transition-all duration-300 ease-out p-2">
+                                        <svg className="w-10 h-10 text-white/90 drop-shadow-lg filter" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                                        </svg>
+                                    </div>
                                     <span className="sr-only">上一张</span>
-                                </Button>
+                                </div>
                             )}
 
-                            {/* Next Button */}
+                            {/* Next Navigation Area */}
                             {images.length > 1 && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                                <div
+                                    className="absolute right-0 top-0 bottom-0 w-24 z-40 flex items-center justify-center group/nav cursor-pointer transition-all duration-300 hover:bg-gradient-to-l hover:from-black/40 hover:to-transparent"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         const currentIndex = images.findIndex(img => img === selectedImage);
@@ -259,11 +257,13 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                                         setPosition({ x: 0, y: 0 });
                                     }}
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
+                                    <div className="opacity-0 translate-x-4 group-hover/nav:opacity-100 group-hover/nav:translate-x-0 transition-all duration-300 ease-out p-2">
+                                        <svg className="w-10 h-10 text-white/90 drop-shadow-lg filter" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
                                     <span className="sr-only">下一张</span>
-                                </Button>
+                                </div>
                             )}
 
                             {/* Image - only show if not text-only */}
