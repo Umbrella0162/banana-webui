@@ -2,6 +2,8 @@
 
 基于 Next.js 16 构建的 Gemini 图像生成 WebUI，提供简洁优雅的用户界面和完整的 API 支持。
 
+> 🤖 **注意**：本项目完全由 Google Antigravity AI 设计与开发。
+
 ## ✨ 功能特性
 
 - 🎨 **文本生成图像** - 支持 Markdown 格式的提示词输入，实时预览
@@ -83,7 +85,7 @@ pnpm dev
 
 ### Vercel 部署（推荐）
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/next-banana)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mete0rrrrr/next-banana)
 
 1. 点击上方按钮
 2. 导入你的 Git 仓库
@@ -115,6 +117,7 @@ MIT License
 
 ## 🙏 致谢
 
+- [Google Antigravity](https://antigravity.google/) - 强大的 AI 助手，完成了本项目的代码编写与构建
 - [Next.js](https://nextjs.org/) - React 框架
 - [Vercel](https://vercel.com/) - 部署平台
-- [Google Gemini](https://ai.google.dev/) - 图像生成 API
+- [Google Gemini API](https://ai.google.dev/) - 图像生成 API
