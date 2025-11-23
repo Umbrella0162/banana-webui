@@ -142,7 +142,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
         return (
             <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">生成结果</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className={`grid gap-4 ${numImages <= 4 ? 'grid-cols-2' : 'grid-cols-3'}`}>
                     {Array.from({ length: numImages }).map((_, i) => (
                         <div
                             key={i}
@@ -175,7 +175,7 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
 
             {/* Image Grid */}
             {images.length > 0 && (
-                <div className="grid grid-cols-3 gap-4">
+                <div className={`grid gap-4 ${images.length <= 4 ? 'grid-cols-2' : 'grid-cols-3'}`}>
                     {images.map((img, index) => (
                         <div
                             key={index}
