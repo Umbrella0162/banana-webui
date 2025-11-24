@@ -1,4 +1,5 @@
 import { fileToBase64 } from "./image-utils";
+import { MODEL_CONFIGS, ModelId } from "./config";
 
 export interface GenerateImageParams {
     model: string;
@@ -119,7 +120,12 @@ export class GeminiImageClient {
         if (aspectRatio && aspectRatio !== "不设置") {
             imageConfig.aspectRatio = aspectRatio;
         }
-        if (resolution && resolution !== "不设置") {
+
+        // 检查模型是否禁用分辨率参数
+        const modelConfig = MODEL_CONFIGS[model as ModelId];
+        const shouldSendResolution = !modelConfig?.disableResolution;
+
+        if (shouldSendResolution && resolution && resolution !== "不设置") {
             imageConfig.imageSize = resolution;
         }
 

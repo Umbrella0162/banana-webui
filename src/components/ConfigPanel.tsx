@@ -53,6 +53,8 @@ export function ConfigPanel({
     const supportedResolutions = modelConfig.resolutions;
     const supportsSearch = modelConfig.supportsSearch;
 
+    const disableResolution = modelConfig.disableResolution;
+
     return (
         <Card className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
             <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-900">
@@ -81,8 +83,11 @@ export function ConfigPanel({
 
                 {/* 分辨率 */}
                 <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">分辨率</Label>
-                    <Select value={resolution} onValueChange={setResolution} disabled={disabled}>
+                    <Label className="text-sm font-medium text-gray-700">
+                        分辨率
+                        {disableResolution && <span className="ml-2 text-xs text-gray-400 font-normal">(当前模型不可用)</span>}
+                    </Label>
+                    <Select value={resolution} onValueChange={setResolution} disabled={disabled || disableResolution}>
                         <SelectTrigger className="bg-white">
                             <SelectValue placeholder="选择分辨率" />
                         </SelectTrigger>

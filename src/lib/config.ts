@@ -5,6 +5,7 @@ export const MODEL_CONFIGS = {
         maxResolution: "1K",
         supportsSearch: true,
         maxInputImages: 3,
+        disableResolution: true, // Gemini 2.5 不支持分辨率参数
     },
     "gemini-3-pro-image-preview": {
         displayName: "Gemini 3 Pro (Nano Banana Pro)",
@@ -12,6 +13,7 @@ export const MODEL_CONFIGS = {
         maxResolution: "4K",
         supportsSearch: true,
         maxInputImages: 14,
+        disableResolution: false,
     },
     "nano-banana-pro-preview": {
         displayName: "Nano Banana Pro Preview",
@@ -19,6 +21,7 @@ export const MODEL_CONFIGS = {
         maxResolution: "4K",
         supportsSearch: true,
         maxInputImages: 14,
+        disableResolution: false,
     },
 } as const;
 
