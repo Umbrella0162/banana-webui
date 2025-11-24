@@ -1,35 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Key, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { StorageManager } from "@/lib/storage";
+import { SecureStorage } from "@/lib/secure-storage";
 import { toast } from "sonner";
 
 export function ApiKeyInput() {
-    const [apiKey, setApiKey] = useState(() => StorageManager.getApiKey() || "");
+    const [apiKey, setApiKey] = useState("");
     const [showKey, setShowKey] = useState(false);
-    const [isSaved, setIsSaved] = useState(() => !!StorageManager.getApiKey());
+    const [isSaved, setIsSaved] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleSave = () => {
+    // 异步加载 API 密钥
+    useEffect(() => {
+        SecureStorage.getApiKey()
+            .then((key) => {
+                if (key) {
+                    setApiKey(key);
+                    setIsSaved(true);
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to load API key:", error);
+                toast.error("加载 API 密钥失败");
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }, []);
+
+    const handleSave = async () => {
         if (!apiKey.trim()) {
             toast.error("请输入有效的 API 密钥");
             return;
         }
-        StorageManager.saveApiKey(apiKey);
-        setIsSaved(true);
-        toast.success("API 密钥已保存");
+
+        try {
+            await SecureStorage.saveApiKey(apiKey);
+            setIsSaved(true);
+            toast.success("API 密钥已安全保存 (加密存储)");
+        } catch (error) {
+            console.error("Failed to save API key:", error);
+            toast.error("保存失败,请重试");
+        }
     };
 
-    const handleClear = () => {
-        StorageManager.clearAll();
-        setApiKey("");
-        setIsSaved(false);
-        toast.info("API 密钥已清除");
+    const handleClear = async () => {
+        try {
+            await SecureStorage.clearAll();
+            setApiKey("");
+            setIsSaved(false);
+            toast.info("API 密钥已清除");
+        } catch (error) {
+            console.error("Failed to clear API key:", error);
+            toast.error("清除失败,请重试");
+        }
     };
+
+    if (isLoading) {
+        return (
+            <Card className="p-4 bg-banana-50 border border-banana-200 mb-6">
+                <div className="flex items-center justify-center py-2">
+                    <div className="text-sm text-gray-500">加载中...</div>
+                </div>
+            </Card>
+        );
+    }
 
     return (
         <Card className="p-4 bg-banana-50 border border-banana-200 mb-6">
@@ -68,7 +108,7 @@ export function ApiKeyInput() {
                         )}
                     </div>
                     <p className="mt-2 text-xs text-gray-600">
-                        密钥将保存在你的浏览器本地，不会上传到任何服务器。
+                        密钥使用 AES-GCM 加密后存储在浏览器 IndexedDB 中,不会上传到任何服务器。
                         <a
                             href="https://aistudio.google.com/app/apikey"
                             target="_blank"

@@ -81,9 +81,8 @@ export class GeminiImageClient {
     async generateImage(params: GenerateImageParams): Promise<GenerationResult> {
         const { model, prompt, images, aspectRatio, resolution, enableSearch } = params;
 
-        // Construct URL
-        // Pattern: https://{endpoint}/v1beta/models/{model}:generateContent?key={apiKey}
-        const url = `${this.apiEndpoint}/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
+        // Construct URL (without API key in query params)
+        const url = `${this.apiEndpoint}/v1beta/models/${model}:generateContent`;
 
         // Prepare parts
         const parts: ContentPart[] = [];
@@ -147,6 +146,7 @@ export class GeminiImageClient {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "x-goog-api-key": this.apiKey,
                 },
                 body: JSON.stringify(payload),
             });

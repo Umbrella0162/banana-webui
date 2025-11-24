@@ -11,7 +11,7 @@ import { GenerateButton } from "@/components/GenerateButton";
 import { ImageGallery } from "@/components/ImageGallery";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { GeminiImageClient, GeneratedImage } from "@/lib/gemini-client";
-import { StorageManager } from "@/lib/storage";
+import { SecureStorage } from "@/lib/secure-storage";
 import { MODEL_CONFIGS, ModelId } from "@/lib/config";
 import { compressImage } from "@/lib/image-utils";
 
@@ -48,8 +48,9 @@ export function ImageGenerator() {
     }, [model, resolution, enableSearch]);
 
     const handleGenerate = async () => {
-        const apiKey = StorageManager.getApiKey();
-        const apiEndpoint = StorageManager.getEndpoint(); // Get custom endpoint
+        // 异步获取 API 密钥和端点
+        const apiKey = await SecureStorage.getApiKey();
+        const apiEndpoint = await SecureStorage.getEndpoint();
 
         // 验证 API 密钥是否存在且不为空
         if (!apiKey || apiKey.trim() === '') {
