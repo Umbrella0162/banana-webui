@@ -339,88 +339,91 @@ export function ImageGallery({ images, textResponse, loading, numImages = 4 }: I
                             )}
 
                             {/* Bottom Control Bar - Glassmorphism Style */}
-                            {!selectedImage.isTextOnly && (
-                                <div
-                                    className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/30 shadow-lg"
-                                    onClick={(e) => e.stopPropagation()}
+                            <div
+                                className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/30 shadow-lg"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Zoom controls - only show for images */}
+                                {!selectedImage.isTextOnly && (
+                                    <>
+                                        {/* Zoom Out */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
+                                            onClick={() => setZoom(prev => Math.max(0.5, prev - 0.5))}
+                                            disabled={zoom <= 0.5}
+                                            title="缩小"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                                            </svg>
+                                        </Button>
+
+                                        {/* Reset Zoom and Position */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
+                                            onClick={() => {
+                                                setZoom(1);
+                                                setPosition({ x: 0, y: 0 });
+                                            }}
+                                            disabled={zoom === 1 && position.x === 0 && position.y === 0}
+                                            title="重置位置和缩放"
+                                        >
+                                            <span className="text-xs font-medium">{Math.round(zoom * 100)}%</span>
+                                        </Button>
+
+                                        {/* Zoom In */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
+                                            onClick={() => setZoom(prev => Math.min(3, prev + 0.5))}
+                                            disabled={zoom >= 3}
+                                            title="放大"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                                            </svg>
+                                        </Button>
+
+                                        {/* Divider */}
+                                        <div className="h-6 w-px bg-white/30 mx-1" />
+
+                                        {/* Download */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
+                                            onClick={() => {
+                                                downloadImage(selectedImage.url, `gemini-generated-${Date.now()}.png`);
+                                            }}
+                                            title="下载"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                        </Button>
+
+                                        {/* Divider */}
+                                        <div className="h-6 w-px bg-white/30 mx-1" />
+                                    </>
+                                )}
+
+                                {/* Close Button - always show */}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedImage(null);
+                                    }}
+                                    title="关闭"
                                 >
-                                    {/* Zoom Out */}
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
-                                        onClick={() => setZoom(prev => Math.max(0.5, prev - 0.5))}
-                                        disabled={zoom <= 0.5}
-                                        title="缩小"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
-                                        </svg>
-                                    </Button>
-
-                                    {/* Reset Zoom and Position */}
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
-                                        onClick={() => {
-                                            setZoom(1);
-                                            setPosition({ x: 0, y: 0 });
-                                        }}
-                                        disabled={zoom === 1 && position.x === 0 && position.y === 0}
-                                        title="重置位置和缩放"
-                                    >
-                                        <span className="text-xs font-medium">{Math.round(zoom * 100)}%</span>
-                                    </Button>
-
-                                    {/* Zoom In */}
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
-                                        onClick={() => setZoom(prev => Math.min(3, prev + 0.5))}
-                                        disabled={zoom >= 3}
-                                        title="放大"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-                                        </svg>
-                                    </Button>
-
-                                    {/* Divider */}
-                                    <div className="h-6 w-px bg-white/30 mx-1" />
-
-                                    {/* Download */}
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
-                                        onClick={() => {
-                                            downloadImage(selectedImage.url, `gemini-generated-${Date.now()}.png`);
-                                        }}
-                                        title="下载"
-                                    >
-                                        <Download className="w-4 h-4" />
-                                    </Button>
-
-                                    {/* Divider */}
-                                    <div className="h-6 w-px bg-white/30 mx-1" />
-
-                                    {/* Close Button */}
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedImage(null);
-                                        }}
-                                        title="关闭"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            )}
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
                         </div>
                     </DialogContent>
                 )}
