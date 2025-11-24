@@ -80,7 +80,7 @@ pnpm dev
 
 ### Vercel 部署（推荐）
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mete0rrrrr/next-banana)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Umbrella0162/banana-webui)
 
 1. 点击上方按钮
 2. 导入你的 Git 仓库
