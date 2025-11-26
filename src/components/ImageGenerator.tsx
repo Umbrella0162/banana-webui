@@ -187,9 +187,9 @@ export function ImageGenerator() {
                 <SettingsDialog />
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex flex-col md:flex-row md:flex-wrap lg:flex-nowrap gap-6">
                 {/* Left Column: Input */}
-                <div className="w-full lg:w-[350px] xl:w-[400px] flex-shrink-0 space-y-6">
+                <div className="w-full md:w-[calc(50%-0.75rem)] lg:w-[350px] xl:w-[400px] flex-shrink-0 space-y-6">
                     <PromptInput
                         value={prompt}
                         onChange={setPrompt}
@@ -206,7 +206,7 @@ export function ImageGenerator() {
                 </div>
 
                 {/* Center Column: Config */}
-                <div className="w-full lg:w-[300px] xl:w-[320px] flex-shrink-0 space-y-6">
+                <div className="w-full md:w-[calc(50%-0.75rem)] md:order-3 lg:w-[300px] xl:w-[320px] lg:order-none flex-shrink-0 space-y-6">
                     <ModelSelector
                         value={model}
                         onChange={setModel}
@@ -234,7 +234,7 @@ export function ImageGenerator() {
                 </div>
 
                 {/* Right Column: Gallery */}
-                <div className="flex-1 min-w-0 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <div className="w-full md:w-[calc(50%-0.75rem)] md:order-2 lg:flex-1 lg:order-none lg:min-w-0 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <ImageGallery
                         images={generatedImages}
                         textResponse={textResponse}
